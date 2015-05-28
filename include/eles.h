@@ -32,6 +32,10 @@
 #include "cuda_runtime_api.h"
 #include "cusparse_v2.h"
 #endif
+//zhang-sta-2015.5.6
+#ifndef _GPU
+#define PI 3.141592653589793
+#endif
 
 class eles
 {	
