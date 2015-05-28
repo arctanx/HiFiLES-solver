@@ -588,16 +588,16 @@ void eles::set_ics(double& time)
           v_theta_l = 1.0 - exp(-1.26 * (r_l/r_c) * (r_l/r_c));
           v_theta_l *= Gamma0;
           v_theta_l /= 2 * PI * r_l;
-          ux_l = v_theta_l * pos(2) / r_l;
-          uy_l = -v_theta_l * pos(1) / r_l;
+          ux_l = v_theta_l * pos(1) / r_l;
+          uy_l = -v_theta_l * pos(0) / r_l;
 
           //right vortex counter-clockwise
           r_r = sqrt((pos(0) - x0_r)*(pos(0) - x0_r) + (pos(1) - y0_r)*(pos(1) - y0_r));
           v_theta_r = 1.0 - exp(-1.26 * (r_r/r_c) * (r_r/r_c));
           v_theta_r *= Gamma0;
           v_theta_r /= 2 * PI * r_r;
-          ux_r = -v_theta_r * pos(2) / r_r;
-          uy_r = v_theta_r * pos(1) / r_r;
+          ux_r = -v_theta_r * pos(1) / r_r;
+          uy_r = v_theta_r * pos(0) / r_r;
 
           rho=run_input.rho_c_ic;
           p=run_input.p_c_ic;
