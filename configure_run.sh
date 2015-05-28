@@ -40,21 +40,21 @@ NVCC="nvcc"             # NVidia CUDA compiler
 MPICC="mpicxx"          # MPI C compiler
 # ---------------------------------------------------------------
 # Library & Header File Locations [Change filepaths as needed]
-BLAS_LIB="/usr/local/atlas/lib"
-BLAS_INCLUDE="/usr/local/atlas/include"
+BLAS_LIB="/usr/lib/atlas-base"
+BLAS_INCLUDE="/usr/include/atlas"
 
 TECIO_LIB="lib/tecio-2008/lib"
 TECIO_INCLUDE="lib/tecio-2008/include"
 
 # If building the supplied ParMETIS libraries, need the MPI header location
-MPI_INCLUDE="/usr/include/mpich2"       # location of mpi.h
+MPI_INCLUDE="/usr/include/mpi"       # location of mpi.h
 
 # If NOT building the supplied ParMetis library, location of installed libraries
-PARMETIS_LIB="/usr/local/lib"           # location of libparmetis.a
-PARMETIS_INCLUDE="/usr/local/include"   # location of parmetis.h
+PARMETIS_LIB="/usr/lib"           # location of libparmetis.a
+PARMETIS_INCLUDE="/usr/include"   # location of parmetis.h
 
-METIS_LIB="/usr/local/lib"              # location of libmetis.a
-METIS_INCLUDE="/usr/local/include"      # location of metis.h
+METIS_LIB="/usr/lib"              # location of libmetis.a
+METIS_INCLUDE="/usr/include"      # location of metis.h
 
 # GPU Architechture Selection: -gencode=arch=compute_xx,code=sm_xx (default: 20)
 #   compute_10	 Basic features
@@ -89,7 +89,7 @@ then
     TECIO_LIB="NO"
     TECIO_INCLUDE="NO"
 fi
-./configure --prefix=$HIFILES_RUN/.. \
+./configure --prefix=/home/zhang/HiFiLES-solver \
             --with-CXX=$CXX \
             --with-BLAS=$BLAS \
             --with-BLAS-lib=$BLAS_LIB \
