@@ -568,6 +568,52 @@ void eles::set_ics(double& time)
           ics(4)=p/(gamma-1.0)+0.5*rho*(ics(1)*ics(1)+ics(2)*ics(2)+ics(3)*ics(3));
         }
       }
+      /////////////////////////////////////////////////
+      /// Zhang-sta-2015.5.6: Lamb-Oseen Vortex
+      /////////////////////////////////////////////////
+      else if (run_input.ic_form == 8)
+      {
+          double Gamma0, r_l, r_r, r_c, v_theta_l, v_theta_r;
+          double x0_l, y0_l, x0_r, y0_r;
+          double ux_l, uy_l, ux_r, uy_r;
+          x0_l = -25.3;
+          y0_l = 300;
+          x0_r = 25.3;
+          y0_r = 300;
+          Gamma0 = 565.0;
+          r_c = 2.255;
+
+          //left vortex clockwise
+          r_l = sqrt((pos(0) - x0_l)*(pos(0) - x0_l) + (pos(1) - y0_l)*(pos(1) - y0_l));
+          v_theta_l = 1.0 - exp(-1.26 * (r_l/r_c) * (r_l/r_c));
+          v_theta_l *= Gamma0;
+          v_theta_l /= 2 * PI * r_l;
+          ux_l = v_theta_l * pos(2) / r_l;
+          uy_l = -v_theta_l * pos(1) / r_l;
+
+          //right vortex counter-clockwise
+          r_r = sqrt((pos(0) - x0_r)*(pos(0) - x0_r) + (pos(1) - y0_r)*(pos(1) - y0_r));
+          v_theta_r = 1.0 - exp(-1.26 * (r_r/r_c) * (r_r/r_c));
+          v_theta_r *= Gamma0;
+          v_theta_r /= 2 * PI * r_r;
+          ux_r = -v_theta_r * pos(2) / r_r;
+          uy_r = v_theta_r * pos(1) / r_r;
+
+          rho=run_input.rho_c_ic;
+          p=run_input.p_c_ic;
+          ics(0) = rho;
+          if(n_dims==2)
+          {
+              //2D
+              //p = 0.0;
+              ics(1) = ux_l + ux_r;
+              ics(2) = uy_l + uy_r;
+              ics(3) = p/(gamma-1.0) + 0.5*rho*(ics(1)*ics(1)+ics(2)*ics(2));
+          }
+      }
+      /////////////////////////////////////////////////
+      /// Zhang-end-2015.5.19: Lamb-Oseen Vortex
+      /////////////////////////////////////////////////
       else
       {
         cout << "ERROR: Invalid form of initial condition ... (File: " << __FILE__ << ", Line: " << __LINE__ << ")" << endl;
