@@ -567,7 +567,7 @@ void eles::set_ics(double& time)
         }
       }
       /////////////////////////////////////////////////
-      /// Zhang-sta-2015.5.6: Lamb-Oseen Vortex
+      /// zhang-sta-2015.5.6: Lamb-Oseen Vortex
       /////////////////////////////////////////////////
       else if (run_input.ic_form == 8)
       {
@@ -575,9 +575,9 @@ void eles::set_ics(double& time)
           double x0_l, y0_l, x0_r, y0_r;
           double ux_l, uy_l, ux_r, uy_r;
           x0_l = -25.3;
-          y0_l = 300;
+          y0_l = 0;
           x0_r = 25.3;
-          y0_r = 300;
+          y0_r = 0;
           Gamma0 = 565.0;
           r_c = 2.255;
 
@@ -586,16 +586,16 @@ void eles::set_ics(double& time)
           v_theta_l = 1.0 - exp(-1.26 * (r_l/r_c) * (r_l/r_c));
           v_theta_l *= Gamma0;
           v_theta_l /= 2 * PI * r_l;
-          ux_l = v_theta_l * pos(1) / r_l;
-          uy_l = -v_theta_l * pos(0) / r_l;
+          ux_l = v_theta_l * (pos(1)-y0_l) / r_l;
+          uy_l = -v_theta_l * (pos(0)-x0_l) / r_l;
 
           //right vortex counter-clockwise
           r_r = sqrt((pos(0) - x0_r)*(pos(0) - x0_r) + (pos(1) - y0_r)*(pos(1) - y0_r));
           v_theta_r = 1.0 - exp(-1.26 * (r_r/r_c) * (r_r/r_c));
           v_theta_r *= Gamma0;
           v_theta_r /= 2 * PI * r_r;
-          ux_r = -v_theta_r * pos(1) / r_r;
-          uy_r = v_theta_r * pos(0) / r_r;
+          ux_r = -v_theta_r * (pos(1)-y0_r) / r_r;
+          uy_r = v_theta_r * (pos(0)-x0_r) / r_r;
 
           rho=run_input.rho_c_ic;
           p=run_input.p_c_ic;
@@ -610,7 +610,7 @@ void eles::set_ics(double& time)
           }
       }
       /////////////////////////////////////////////////
-      /// Zhang-end-2015.5.19: Lamb-Oseen Vortex
+      /// zhang-end-2015.5.19: Lamb-Oseen Vortex
       /////////////////////////////////////////////////
       else
       {
@@ -6809,7 +6809,15 @@ void eles::compute_wall_forces( array<double>& inv_force, array<double>& vis_for
   }
   
   // one over the dynamic pressure - factor for computing friction coeff, pressure coeff, forces
-  factor = 1.0 / (0.5*run_input.rho_c_ic*(run_input.u_c_ic*run_input.u_c_ic+run_input.v_c_ic*run_input.v_c_ic+run_input.w_c_ic*run_input.w_c_ic));
+  //zhang-2015.6.9
+  if (run_input.u_c_ic + run_input.v_c_ic + run_input.w_c_ic < 1.0E-10)
+  {
+    factor = 0.0;
+  }
+  else
+  {
+    factor = 1.0 / (0.5*run_input.rho_c_ic*(run_input.u_c_ic*run_input.u_c_ic+run_input.v_c_ic*run_input.v_c_ic+run_input.w_c_ic*run_input.w_c_ic));
+  }
 
   // Add a header to the force file
   if (write_forces) { coeff_file << setw(18) << "x" << setw(18) << "Cp" << setw(18) << "Cf" << endl; }
@@ -6899,7 +6907,8 @@ void eles::compute_wall_forces( array<double>& inv_force, array<double>& vis_for
                   
                   // Inviscid force
                   for (int m=0;m<n_dims;m++)
-                    {
+                    {:x
+
                       Finv(m) = wgt*(p_l-run_input.p_c_ic)*norm(m)*detjac*factor;
                     }
                   
@@ -6908,13 +6917,6 @@ void eles::compute_wall_forces( array<double>& inv_force, array<double>& vis_for
                   if (n_dims==2)
                   {
                     cl = -Finv(0)*sin(aoa) + Finv(1)*cos(aoa);
-                    cd = Finv(0)*cos(aoa) + Finv(1)*sin(aoa);
-                  }
-                  else if (n_dims==3)
-                  {
-                    cl = -Finv(0)*sin(aoa) + Finv(1)*cos(aoa);
-                    cd = Finv(0)*cos(aoa)*cos(aos) + Finv(1)*sin(aoa) + Finv(2)*sin(aoa)*cos(aos);
-                  }
                   
                   // write to file
                   if (write_forces) { coeff_file << scientific << setw(18) << setprecision(12) << pos(0) << " " << setw(18) << setprecision(12) << cp;}
@@ -6930,8 +6932,7 @@ void eles::compute_wall_forces( array<double>& inv_force, array<double>& vis_for
                             {
                               dv(n,m) = 1.0/u_l(0)*(grad_u_l(n+1,m)-drho(m)*u_l(n+1));;
                             }
-                          de(m) = 1.0/u_l(0)*(grad_u_l(n_dims+1,m)-drho(m)*u_l(n_dims+1));;
-                        }
+                          de(m) = 1.0/u_l(0)*(grad_u_l(n_dims+1,m)-drho(m)*u_l(n_dims+1));;                        }
 
                       // trace of stress tensor
                       diag = 0.;
@@ -6948,7 +6949,6 @@ void eles::compute_wall_forces( array<double>& inv_force, array<double>& vis_for
                           inte -= 0.5*u_l(m+1)*u_l(m+1);
                         }
 
-                      // get viscosity
                       rt_ratio = (run_input.gamma-1.0)*inte/(run_input.rt_inf);
                       mu = (run_input.mu_inf)*pow(rt_ratio,1.5)*(1+(run_input.c_sth))/(rt_ratio+(run_input.c_sth));
                       mu = mu + run_input.fix_vis*(run_input.mu_inf - mu);
